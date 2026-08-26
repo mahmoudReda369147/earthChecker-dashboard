@@ -1,2 +1,5 @@
-// Submissions API endpoint constants
-export const SUBMISSIONS_ENDPOINTS = {}
+export const SUBMISSIONS_ENDPOINTS = {
+  LIST:     '/submissions',
+  SUBMIT:   '/submissions',
+  BY_CYCLE: (cycleId) => `/submissions/cycle/${cycleId}`,
+}

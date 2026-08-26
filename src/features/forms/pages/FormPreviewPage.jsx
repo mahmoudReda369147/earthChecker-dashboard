@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  Loader2, AlertTriangle, ArrowLeft, Eye, X,
+  Loader2, AlertTriangle, ArrowLeft, Eye, X, Upload,
   AlignLeft, Hash, Image, Star, Calendar,
   MessageSquare, ChevronDown, List, Check,
 } from 'lucide-react'
 import { useForm } from '../apiHooks'
 import Dropdown from '../../../components/ui/Dropdown'
+import DatePicker from '../../../components/ui/DatePicker'
 
 /* ═══════════════════════════════════════════════════════════
    Type metadata — icon + label for each section type
@@ -45,6 +46,7 @@ function usePreviewForm(formId) {
 function SectionField({ section, idx, answer, onChange, isActive, onClick }) {
   const meta = TYPE_META[section.type] ?? TYPE_META.short_text
   const { Icon } = meta
+  const fileRef = useRef(null)
 
   /* ── Note / section header — no input ── */
   if (section.type === 'note') {
@@ -129,80 +131,45 @@ function SectionField({ section, idx, answer, onChange, isActive, onClick }) {
 
           {/* Short answer */}
           {section.type === 'short_text' && (
-            <input
-              type="text"
-              value={answer ?? ''}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder="Your answer"
-              className="input-glass w-full"
-            />
+            <input type="text" value={answer ?? ''} onChange={(e) => onChange(e.target.value)}
+              placeholder="Your answer" className="input-glass w-full" />
           )}
 
           {/* Paragraph */}
           {section.type === 'paragraph' && (
-            <textarea
-              value={answer ?? ''}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder="Your answer"
-              rows={4}
-              className="input-glass w-full resize-none"
-            />
+            <textarea value={answer ?? ''} onChange={(e) => onChange(e.target.value)}
+              placeholder="Your answer" rows={4} className="input-glass w-full resize-none" />
+          )}
+
+          {/* Textarea */}
+          {section.type === 'textarea' && (
+            <textarea value={answer ?? ''} onChange={(e) => onChange(e.target.value)}
+              placeholder={section.descriptions || 'Your answer'} rows={4} className="input-glass w-full resize-none" />
           )}
 
           {/* Number */}
           {section.type === 'number' && (
-            <input
-              type="number"
-              value={answer ?? ''}
-              onChange={(e) => onChange(e.target.value)}
+            <input type="number" value={answer ?? ''} onChange={(e) => onChange(e.target.value)}
               placeholder="0"
-              className="input-glass w-48"
-            />
+              min={section.setting?.min ?? undefined}
+              max={section.setting?.max ?? undefined}
+              className="input-glass w-48" />
           )}
 
-          {/* Radio */}
+          {/* Radio — multi-select */}
           {section.type === 'radio' && (
             <div className="space-y-3">
-              {(section.options ?? []).map((opt, i) => (
-                <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                  <div
-                    onClick={() => onChange(opt)}
-                    className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer ${
-                      answer === opt
-                        ? 'border-cyan bg-[rgba(0,212,255,0.12)]'
-                        : 'border-[rgba(143,163,184,0.28)] group-hover:border-[rgba(0,212,255,0.4)]'
-                    }`}
-                  >
-                    {answer === opt && (
-                      <div className="w-2 h-2 rounded-full bg-cyan shadow-[0_0_6px_rgba(0,212,255,0.7)]" />
-                    )}
-                  </div>
-                  <span className={`text-[0.85rem] transition-colors ${
-                    answer === opt ? 'text-text-primary' : 'text-steel group-hover:text-text-primary'
-                  }`}>{opt}</span>
-                </label>
-              ))}
-            </div>
-          )}
-
-          {/* Checkboxes */}
-          {section.type === 'checkbox' && (
-            <div className="space-y-3">
               {(section.options ?? []).map((opt, i) => {
-                const selected = Array.isArray(answer) ? answer.includes(opt) : false
+                const arr = Array.isArray(answer) ? answer : (answer ? [answer] : [])
+                const selected = arr.includes(opt)
                 return (
                   <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                    <div
-                      onClick={() => {
-                        const arr = Array.isArray(answer) ? answer : []
-                        onChange(selected ? arr.filter((v) => v !== opt) : [...arr, opt])
-                      }}
+                    <div onClick={() => onChange(selected ? arr.filter((v) => v !== opt) : [...arr, opt])}
                       className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer ${
                         selected
                           ? 'border-cyan bg-[rgba(0,212,255,0.12)]'
                           : 'border-[rgba(143,163,184,0.28)] group-hover:border-[rgba(0,212,255,0.4)]'
-                      }`}
-                    >
+                      }`}>
                       {selected && (
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" strokeWidth="3.5">
                           <polyline points="20 6 9 17 4 12" />
@@ -218,7 +185,38 @@ function SectionField({ section, idx, answer, onChange, isActive, onClick }) {
             </div>
           )}
 
-          {/* Dropdown — use global Dropdown component */}
+          {/* Checkboxes */}
+          {section.type === 'checkbox' && (
+            <div className="space-y-3">
+              {(section.options ?? []).map((opt, i) => {
+                const selected = Array.isArray(answer) ? answer.includes(opt) : false
+                return (
+                  <label key={i} className="flex items-center gap-3 cursor-pointer group">
+                    <div onClick={() => {
+                        const arr = Array.isArray(answer) ? answer : []
+                        onChange(selected ? arr.filter((v) => v !== opt) : [...arr, opt])
+                      }}
+                      className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+                        selected
+                          ? 'border-cyan bg-[rgba(0,212,255,0.12)]'
+                          : 'border-[rgba(143,163,184,0.28)] group-hover:border-[rgba(0,212,255,0.4)]'
+                      }`}>
+                      {selected && (
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" strokeWidth="3.5">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className={`text-[0.85rem] transition-colors ${
+                      selected ? 'text-text-primary' : 'text-steel group-hover:text-text-primary'
+                    }`}>{opt}</span>
+                  </label>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Dropdown */}
           {section.type === 'select' && (
             <Dropdown
               value={answer ?? ''}
@@ -230,51 +228,60 @@ function SectionField({ section, idx, answer, onChange, isActive, onClick }) {
 
           {/* Image upload */}
           {section.type === 'image' && (
-            <label className="block rounded-xl border-2 border-dashed border-[rgba(143,163,184,0.18)] p-8 text-center cursor-pointer hover:border-[rgba(0,212,255,0.35)] hover:bg-[rgba(0,212,255,0.02)] transition-all group">
-              <div className="w-12 h-12 rounded-xl bg-[rgba(0,212,255,0.06)] border border-[rgba(0,212,255,0.15)] flex items-center justify-center mx-auto mb-3 group-hover:bg-[rgba(0,212,255,0.1)] transition-all">
-                <Image size={20} className={answer ? 'text-cyan' : 'text-steel'} />
-              </div>
-              <p className={`text-[0.82rem] font-medium ${answer ? 'text-cyan' : 'text-steel'}`}>
-                {answer ? `Selected: ${answer}` : 'Click to upload image'}
-              </p>
-              <p className="text-[0.68rem] text-text-muted mt-1">JPEG · PNG · WEBP</p>
+            <div className="space-y-2">
+              <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  const url = URL.createObjectURL(file)
+                  onChange(url)
+                }}
+              />
+              {answer ? (
+                <div className="relative group w-full">
+                  <img src={answer} alt="upload" className="w-full max-h-64 object-cover rounded-xl border border-[rgba(0,212,255,0.2)]" />
+                  <button type="button" onClick={() => onChange('')}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-[rgba(6,8,16,0.8)] border border-[rgba(200,121,65,0.4)] flex items-center justify-center text-copper hover:bg-[rgba(200,121,65,0.15)] transition-all">
+                    <X size={12} />
+                  </button>
+                </div>
+              ) : (
+                <button type="button" onClick={() => fileRef.current?.click()}
+                  className="w-full rounded-xl border-2 border-dashed border-[rgba(143,163,184,0.18)] p-8 text-center cursor-pointer hover:border-[rgba(0,212,255,0.35)] hover:bg-[rgba(0,212,255,0.02)] transition-all group">
+                  <div className="w-12 h-12 rounded-xl bg-[rgba(0,212,255,0.06)] border border-[rgba(0,212,255,0.15)] flex items-center justify-center mx-auto mb-3 group-hover:bg-[rgba(0,212,255,0.1)] transition-all">
+                    <Upload size={20} className="text-steel" />
+                  </div>
+                  <p className="text-[0.82rem] font-medium text-steel">
+                    Click to upload image
+                  </p>
+                  <p className="text-[0.68rem] text-text-muted mt-1">JPEG · PNG · WEBP</p>
+                </button>
+              )}
               {section.assignedBotId && (
-                <p className="text-[0.68rem] text-copper mt-2 flex items-center justify-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-copper inline-block animate-dot-pulse" />
+                <p className="text-[0.68rem] text-copper flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-copper inline-block animate-pulse" />
                   AI agent will analyze this image
                 </p>
               )}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => onChange(e.target.files[0]?.name ?? '')}
-              />
-            </label>
+            </div>
           )}
 
           {/* Rating */}
           {section.type === 'rating' && (
             <div className="flex items-center gap-1.5">
               {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => onChange(n)}
-                  className="transition-all duration-150 hover:scale-110 active:scale-95"
-                >
-                  <svg
-                    width="32" height="32" viewBox="0 0 24 24"
+                <button key={n} type="button" onClick={() => onChange(n)}
+                  className="transition-all duration-150 hover:scale-110 active:scale-95">
+                  <svg width="32" height="32" viewBox="0 0 24 24"
                     fill={(answer ?? 0) >= n ? '#c87941' : 'none'}
                     stroke={(answer ?? 0) >= n ? '#c87941' : 'rgba(143,163,184,0.3)'}
                     strokeWidth="1.5"
-                    style={{ filter: (answer ?? 0) >= n ? 'drop-shadow(0 0 5px rgba(200,121,65,0.55))' : 'none' }}
-                  >
+                    style={{ filter: (answer ?? 0) >= n ? 'drop-shadow(0 0 5px rgba(200,121,65,0.55))' : 'none' }}>
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                   </svg>
                 </button>
               ))}
-              {answer > 0 && (
+              {(answer ?? 0) > 0 && (
                 <span className="ml-2 text-[0.75rem] text-copper font-semibold">{answer} / 5</span>
               )}
             </div>
@@ -282,12 +289,7 @@ function SectionField({ section, idx, answer, onChange, isActive, onClick }) {
 
           {/* Date */}
           {section.type === 'date' && (
-            <input
-              type="date"
-              value={answer ?? ''}
-              onChange={(e) => onChange(e.target.value)}
-              className="input-glass w-56"
-            />
+            <DatePicker value={answer ?? ''} onChange={onChange} placeholder="Select a date" />
           )}
 
         </div>
@@ -344,16 +346,15 @@ export default function FormPreviewPage() {
   const sections = form.sections ?? []
 
   /* Progress calculation */
-  const inputIdxs = sections.reduce((acc, s, i) => {
-    if (s.type !== 'note') acc.push(i)
-    return acc
-  }, [])
-  const total   = inputIdxs.length
-  const answered = inputIdxs.filter((i) => {
+  const inputSections = sections.filter((s) => s.type !== 'note')
+  const total   = inputSections.length
+  const answered = sections.reduce((count, s, i) => {
+    if (s.type === 'note') return count
     const ans = answers[i]
-    return ans !== undefined && ans !== '' && ans !== null &&
-      !(Array.isArray(ans) && ans.length === 0)
-  }).length
+    if (ans !== undefined && ans !== '' && ans !== null &&
+      !(Array.isArray(ans) && ans.length === 0)) return count + 1
+    return count
+  }, 0)
   const progress = total > 0 ? Math.round((answered / total) * 100) : 0
 
   return (
@@ -389,7 +390,7 @@ export default function FormPreviewPage() {
             </p>
           </div>
 
-          {/* Right — progress + label */}
+          {/* Right — progress */}
           <div className="flex items-center gap-3 shrink-0">
             {total > 0 && (
               <div className="hidden sm:flex items-center gap-2">
@@ -433,7 +434,6 @@ export default function FormPreviewPage() {
               {form.description && (
                 <p className="text-[0.85rem] text-steel mt-2.5 leading-[1.7]">{form.description}</p>
               )}
-
               {total > 0 && (
                 <div className="flex items-center gap-3 mt-4 pt-4 border-t border-[rgba(143,163,184,0.07)]">
                   <span className="text-[0.68rem] text-text-muted">
@@ -473,36 +473,32 @@ export default function FormPreviewPage() {
             />
           ))}
 
-          {/* ── Footer submit card ── */}
+          {/* ── Footer card ── */}
           {sections.length > 0 && (
             <div className="rounded-xl overflow-hidden bg-[rgba(8,12,24,0.92)] backdrop-blur-xl border border-[rgba(143,163,184,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
-              <div className="px-6 py-5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  {/* Disabled submit button */}
-                  <button
-                    type="button"
-                    disabled
-                    title="Submit is disabled in preview mode"
-                    className="flex items-center gap-2.5 px-6 py-[10px] rounded bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.15)] text-[rgba(0,212,255,0.28)] font-orbitron text-[0.68rem] font-bold tracking-[0.1em] uppercase cursor-not-allowed select-none"
-                  >
-                    <Check size={12} />
-                    Submit Response
-                  </button>
-                  <span className="text-[0.65rem] text-text-muted hidden sm:block">
-                    Disabled in preview mode
-                  </span>
-                </div>
+              <div className="px-6 py-5 space-y-4">
 
-                <button
-                  type="button"
-                  onClick={() => { setAnswers({}); setActiveIdx(null) }}
-                  className="text-[0.72rem] text-text-muted hover:text-steel transition-colors whitespace-nowrap"
-                >
-                  Clear form
-                </button>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <button type="button" disabled
+                      title="Submit is disabled in preview mode"
+                      className="btn-primary flex items-center gap-2.5 px-6 py-[10px] font-orbitron text-[0.68rem] font-bold tracking-[0.1em] uppercase disabled:opacity-50 disabled:cursor-not-allowed">
+                      <Check size={12} />
+                      Submit Response
+                    </button>
+                    <span className="text-[0.65rem] text-text-muted hidden sm:block">
+                      Disabled in preview mode
+                    </span>
+                  </div>
+
+                  <button type="button" onClick={() => { setAnswers({}); setActiveIdx(null) }}
+                    className="text-[0.72rem] text-text-muted hover:text-steel transition-colors whitespace-nowrap">
+                    Clear form
+                  </button>
+                </div>
               </div>
 
-              {/* Completion progress inside footer */}
+              {/* Completion progress */}
               {total > 0 && (
                 <div className="px-6 pb-5">
                   <div className="flex items-center justify-between mb-1.5">

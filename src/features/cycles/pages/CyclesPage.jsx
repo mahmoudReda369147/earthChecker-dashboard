@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   Loader2, AlertTriangle, Plus, Pencil, Trash2,
   Search, Eye,
@@ -89,6 +89,7 @@ const COLUMNS = [
   { key: 'supervisor', label: 'Supervisor', width: '160px'  },
   { key: 'status',     label: 'Status',     align: 'center', width: '160px' },
   { key: 'progress',   label: 'Progress',   width: '130px'  },
+  { key: 'stages',     label: 'Stages',     align: 'center', width: '90px'  },
   { key: 'actions',    label: 'Actions',    align: 'right',  width: '110px' },
 ]
 const PER_PAGE = 10
@@ -126,7 +127,7 @@ export default function CyclesPage() {
       case 'name':
         return <span className="text-[0.82rem] font-semibold text-text-primary">{c.name}</span>
       case 'module':
-        return <span className="text-[0.78rem] text-steel">{c.moduleId?.name ?? c.moduleId?.title ?? '—'}</span>
+        return <span className="text-[0.78rem] text-steel">{c.moduleId?.title ?? c.moduleId?.name ?? '—'}</span>
       case 'supervisor':
         return <SupervisorCell supervisor={c.assignedSupervisor} />
       case 'status':
@@ -143,6 +144,15 @@ export default function CyclesPage() {
         )
       case 'progress':
         return <ProgressBar value={c.progress} />
+      case 'stages':
+        return (
+          <Link
+            to={`/dashboard/cycles/${c._id}/stages`}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[0.7rem] font-semibold text-cyan border border-[rgba(0,212,255,0.2)] bg-[rgba(0,212,255,0.04)] hover:border-[rgba(0,212,255,0.45)] hover:bg-[rgba(0,212,255,0.1)] transition-all"
+          >
+            <Eye size={11} /> Stages
+          </Link>
+        )
       case 'actions':
         return (
           <div className="flex items-center justify-end gap-1.5">
@@ -196,23 +206,25 @@ export default function CyclesPage() {
       />
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px] max-w-[320px]">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <input type="text" placeholder="Search name or ID…" value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             className="w-full pl-8 pr-3 py-[9px] rounded-lg bg-bg-glass backdrop-blur-lg border border-[rgba(143,163,184,0.12)] text-[0.8rem] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-[rgba(0,212,255,0.35)] transition-colors" />
         </div>
-        <Dropdown
-          value={statusF}
-          onChange={(val) => { setStatusF(val); setPage(1) }}
-          placeholder="All Statuses"
-          className="w-[180px]"
-          options={[
-            { value: '', label: 'All Statuses' },
-            ...Object.entries(STATUS).map(([val, s]) => ({ value: val, label: s.label })),
-          ]}
-        />
+        <div className="ml-auto">
+          <Dropdown
+            value={statusF}
+            onChange={(val) => { setStatusF(val); setPage(1) }}
+            placeholder="All Statuses"
+            className="w-[180px]"
+            options={[
+              { value: '', label: 'All Statuses' },
+              ...Object.entries(STATUS).map(([val, s]) => ({ value: val, label: s.label })),
+            ]}
+          />
+        </div>
       </div>
 
       {/* Table */}

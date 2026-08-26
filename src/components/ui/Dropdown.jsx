@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown, Check } from 'lucide-react'
 
 /**
@@ -21,26 +22,65 @@ export default function Dropdown({
   className = '',
 }) {
   const [open, setOpen] = useState(false)
-  const ref             = useRef(null)
+  const [pos, setPos]   = useState({ top: 0, left: 0, width: 0 })
+  const triggerRef      = useRef(null)
+  const panelRef        = useRef(null)
 
   const selected = options.find((o) => o.value === value)
 
+  /* Position panel relative to trigger */
+  const updatePos = useCallback(() => {
+    if (!triggerRef.current) return
+    const rect = triggerRef.current.getBoundingClientRect()
+    setPos({
+      top:   rect.bottom + 4,
+      left:  rect.left,
+      width: rect.width,
+    })
+  }, [])
+
+  /* Open handler */
+  const toggle = () => {
+    if (disabled) return
+    if (!open) updatePos()
+    setOpen((v) => !v)
+  }
+
   /* Close on outside click */
   useEffect(() => {
+    if (!open) return
     const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+      if (
+        triggerRef.current && !triggerRef.current.contains(e.target) &&
+        panelRef.current && !panelRef.current.contains(e.target)
+      ) {
+        setOpen(false)
+      }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [])
+  }, [open])
+
+  /* Reposition on scroll/resize */
+  useEffect(() => {
+    if (!open) return
+    const handler = () => updatePos()
+    window.addEventListener('scroll', handler, true)
+    window.addEventListener('resize', handler)
+    return () => {
+      window.removeEventListener('scroll', handler, true)
+      window.removeEventListener('resize', handler)
+    }
+  }, [open, updatePos])
 
   return (
-    <div ref={ref} className={`relative ${className}`}>
+    <div className={`relative ${className}`}>
       {/* ── Trigger ── */}
       <button
+        ref={triggerRef}
         type="button"
         disabled={disabled}
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         className={`
           w-full flex items-center justify-between gap-2
           px-3 py-2.5 rounded-lg
@@ -69,16 +109,26 @@ export default function Dropdown({
         />
       </button>
 
-      {/* ── Panel ── */}
-      {open && (
-        <div className="
-          absolute left-0 right-0 top-full mt-1 z-[9999]
-          rounded-xl overflow-hidden
-          bg-[rgba(8,12,20,0.98)]
-          border border-[rgba(0,212,255,0.18)]
-          shadow-[0_16px_48px_rgba(0,0,0,0.65)]
-          overflow-y-auto
-        " style={{ maxHeight: 'calc(3 * 42px)' }}>
+      {/* ── Panel (portal) ── */}
+      {open && createPortal(
+        <div
+          ref={panelRef}
+          className="
+            fixed z-[99999]
+            rounded-xl overflow-hidden
+            bg-[rgba(8,12,20,0.98)]
+            border border-[rgba(0,212,255,0.18)]
+            shadow-[0_16px_48px_rgba(0,0,0,0.65)]
+            overflow-y-auto
+            backdrop-blur-xl
+          "
+          style={{
+            top:      pos.top,
+            left:     pos.left,
+            width:    pos.width,
+            maxHeight: 'calc(5 * 42px)',
+          }}
+        >
           {options.length === 0 ? (
             <div className="px-4 py-3 text-[0.8rem] text-text-muted">
               No options available
@@ -112,7 +162,8 @@ export default function Dropdown({
               )
             })
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

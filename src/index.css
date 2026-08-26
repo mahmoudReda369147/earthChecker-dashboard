@@ -264,6 +264,14 @@ body::before {
     border-color: rgba(0,212,255,0.4);
     box-shadow: 0 0 0 3px rgba(0,212,255,0.08), 0 0 15px rgba(0,212,255,0.06);
   }
+  .input-glass:-webkit-autofill,
+  .input-glass:-webkit-autofill:hover,
+  .input-glass:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px rgba(8,12,20,0.95) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    border-color: rgba(0,212,255,0.2);
+    transition: background-color 5000s ease-in-out 0s;
+  }
 
   /* ── Badges ── */
   .badge-cyan {

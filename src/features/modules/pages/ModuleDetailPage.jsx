@@ -4,9 +4,8 @@ import {
   Loader2, AlertTriangle, ArrowLeft, Plus, Pencil, Trash2,
   FileText, Calendar, User, ImageIcon, Eye, ArrowUpDown,
 } from 'lucide-react'
-import PageHeader from '../../../components/ui/PageHeader'
-import Modal      from '../../../components/ui/Modal'
-import DataTable  from '../../../components/ui/DataTable'
+import Modal     from '../../../components/ui/Modal'
+import DataTable from '../../../components/ui/DataTable'
 import { useModule } from '../apiHooks'
 import { useForms, useDeleteForm } from '../../forms/apiHooks'
 
@@ -121,73 +120,97 @@ export default function ModuleDetailPage() {
 
   return (
     <div>
-      <PageHeader
-        title={module.title}
-        subtitle={module.description || 'No description provided'}
-        badge="Module"
-        actions={
-          <div className="flex gap-2">
-            <button className="btn-ghost text-[0.72rem] py-[9px] px-[18px]" onClick={() => navigate('/dashboard/modules')}>
-              <ArrowLeft size={13} /> Back
-            </button>
-            <button className="btn-primary text-[0.72rem] py-[9px] px-[18px]" onClick={() => navigate(`/dashboard/modules/${id}/forms/create`)}>
-              <Plus size={13} /> New Form
-            </button>
-          </div>
-        }
-      />
+      {/* ── Module Hero Card ── */}
+      <div className="rounded-xl overflow-hidden bg-bg-glass backdrop-blur-lg border border-[rgba(0,212,255,0.08)] mb-8">
+        {/* Top accent */}
+        <div className="h-1 bg-gradient-to-r from-cyan via-[rgba(0,180,255,0.6)] to-transparent" />
 
-      {/* Module info card */}
-      <div className="rounded-xl bg-bg-glass backdrop-blur-lg border border-[rgba(0,212,255,0.08)] p-5 mb-8 flex gap-5 items-start">
-        {module.image ? (
-          <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 border border-[rgba(0,212,255,0.12)]">
-            <img src={module.image} alt={module.title} className="w-full h-full object-cover" />
-          </div>
-        ) : (
-          <div className="w-20 h-20 rounded-lg shrink-0 flex items-center justify-center bg-[rgba(0,212,255,0.04)] border border-[rgba(0,212,255,0.1)]">
-            <ImageIcon size={28} className="text-[rgba(0,212,255,0.2)]" />
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <h2 className="font-orbitron text-[1.05rem] font-bold text-text-primary leading-tight">{module.title}</h2>
-          <p className="text-[0.82rem] text-steel mt-1 leading-[1.6]">{module.description || 'No description provided.'}</p>
-          <div className="flex flex-wrap gap-5 mt-3">
-            <div className="flex items-center gap-1.5 text-[0.72rem] text-text-muted">
-              <User size={11} /><span>{module.creatorId?.name ?? '—'}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-[0.72rem] text-text-muted">
-              <Calendar size={11} /><span>{new Date(module.createdAt).toLocaleDateString()}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-[0.72rem] text-cyan">
-              <FileText size={11} /><span>{total} form{total !== 1 ? 's' : ''}</span>
+        <div className="p-5 sm:p-6">
+          {/* Back link */}
+          <button
+            onClick={() => navigate('/dashboard/modules')}
+            className="flex items-center gap-1.5 text-[0.72rem] text-text-muted hover:text-cyan transition-colors mb-4 group"
+          >
+            <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
+            <span>Back to Modules</span>
+          </button>
+
+          <div className="flex gap-5 items-start">
+            {/* Image */}
+            {module.image ? (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 border border-[rgba(0,212,255,0.15)] shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
+                <img src={module.image} alt={module.title} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl shrink-0 flex items-center justify-center bg-[rgba(0,212,255,0.04)] border border-[rgba(0,212,255,0.12)]">
+                <ImageIcon size={24} className="text-[rgba(0,212,255,0.25)]" />
+              </div>
+            )}
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="badge-cyan mb-1.5 inline-flex text-[0.6rem]">Module</span>
+                  <h1 className="font-orbitron font-extrabold text-text-primary tracking-[-0.01em] leading-[1.2]"
+                    style={{ fontSize: 'clamp(1.15rem, 3vw, 1.5rem)' }}>
+                    {module.title}
+                  </h1>
+                  {module.description && (
+                    <p className="text-[0.82rem] text-steel mt-1.5 leading-[1.6] line-clamp-2">{module.description}</p>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    className="btn-ghost text-[0.72rem] py-[8px] px-[14px]"
+                    onClick={() => navigate(`/dashboard/modules/${id}/forms/order`)}
+                  >
+                    <ArrowUpDown size={13} /> Order
+                  </button>
+                  <button
+                    className="btn-primary text-[0.72rem] py-[8px] px-[14px]"
+                    onClick={() => navigate(`/dashboard/modules/${id}/forms/create`)}
+                  >
+                    <Plus size={13} /> New Form
+                  </button>
+                </div>
+              </div>
+
+              {/* Stats row */}
+              <div className="flex flex-wrap items-center gap-4 mt-4 pt-3 border-t border-[rgba(143,163,184,0.08)]">
+                <div className="flex items-center gap-1.5 text-[0.72rem] text-text-muted">
+                  <User size={11} className="text-steel" />
+                  <span>{module.creatorId?.name ?? '—'}</span>
+                </div>
+                <div className="w-px h-3 bg-[rgba(143,163,184,0.12)]" />
+                <div className="flex items-center gap-1.5 text-[0.72rem] text-text-muted">
+                  <Calendar size={11} className="text-steel" />
+                  <span>{new Date(module.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div className="w-px h-3 bg-[rgba(143,163,184,0.12)]" />
+                <div className="flex items-center gap-1.5 text-[0.72rem] font-semibold text-cyan">
+                  <FileText size={11} />
+                  <span>{total} form{total !== 1 ? 's' : ''}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Forms header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-orbitron text-[0.88rem] font-bold text-text-primary tracking-[0.05em]">
+      {/* ── Forms Section Header ── */}
+      <div className="flex items-center gap-2 mb-4">
+        <h2 className="font-orbitron text-[0.85rem] font-bold text-text-primary tracking-[0.04em]">
           Forms
-          <span className="ml-2 font-sans font-normal text-[0.72rem] text-text-muted">{total} total</span>
         </h2>
-        <div className="flex gap-2">
-          <button
-            className="btn-ghost text-[0.72rem] py-[8px] px-[16px]"
-            onClick={() => navigate(`/dashboard/modules/${id}/forms/order`)}
-          >
-            <ArrowUpDown size={13} /> Order
-          </button>
-          <button
-            className="btn-primary text-[0.72rem] py-[8px] px-[16px]"
-            onClick={() => navigate(`/dashboard/modules/${id}/forms/create`)}
-          >
-            <Plus size={13} /> New Form
-          </button>
-        </div>
+        <span className="text-[0.68rem] text-text-muted px-2 py-0.5 rounded bg-[rgba(143,163,184,0.06)] border border-[rgba(143,163,184,0.1)]">
+          {total}
+        </span>
       </div>
 
-      {/* Table */}
+      {/* ── Table ── */}
       {formsLoading ? (
         <div className="flex items-center justify-center h-40">
           <Loader2 size={24} className="animate-spin text-cyan" />
@@ -206,7 +229,7 @@ export default function ModuleDetailPage() {
         />
       )}
 
-      {/* Delete Modal */}
+      {/* ── Delete Modal ── */}
       <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Form" size="sm">
         <div className="space-y-4">
           <p className="text-[0.85rem] text-steel leading-[1.6]">

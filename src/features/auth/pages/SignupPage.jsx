@@ -17,7 +17,6 @@ export default function SignupPage() {
     e.preventDefault()
     setServerError(null)
     setSuccessMsg(null)
-
     register(
       {
         name:     form.fullName,
@@ -44,132 +43,165 @@ export default function SignupPage() {
   ]
 
   return (
-    <div
-      className="grid-overlay"
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        position: 'relative',
-      }}
-    >
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
-          background:
-            'radial-gradient(ellipse 65% 50% at 50% 45%, rgba(200,121,65,0.04) 0%, transparent 60%), ' +
-            'radial-gradient(ellipse 40% 35% at 80% 20%, rgba(0,212,255,0.04) 0%, transparent 55%)',
-        }}
-      />
-
-      <div style={{ position: 'fixed', top: '24px', left: '24px', pointerEvents: 'none', zIndex: 1 }}>
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <path d="M0 20V4a4 4 0 0 1 4-4h16" stroke="rgba(0,212,255,0.3)" strokeWidth="1.5"/>
-        </svg>
-      </div>
-      <div style={{ position: 'fixed', bottom: '24px', right: '24px', pointerEvents: 'none', zIndex: 1 }}>
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <path d="M28 8V24a4 4 0 0 1-4 4H8" stroke="rgba(0,212,255,0.3)" strokeWidth="1.5"/>
-        </svg>
-      </div>
-      <div className="scan-line" style={{ zIndex: 1 }} />
-
-      <div
-        style={{
-          position: 'relative', zIndex: 2,
-          width: '100%', maxWidth: '440px',
-          animation: 'fadeInUp 0.5s ease both',
-        }}
+    <section style={{
+      position: 'relative', width: '100%', height: '100vh',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+    }}>
+      {/* ── Background Video ── */}
+      <video
+        autoPlay muted loop playsInline
+        poster="/background.png"
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
       >
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '8px' }}>
-            <img
-              src="/logo.svg"
-              alt="Feedbrush"
-              style={{ height: '44px', width: 'auto', filter: 'drop-shadow(0 0 10px rgba(0,212,255,0.4))' }}
-            />
-          </div>
-          <p style={{ fontSize: '0.78rem', color: '#8fa3b8', letterSpacing: '0.04em' }}>
-            Start your free 14-day trial
-          </p>
+        <source src="/assets/videos/Fabric_texture_under_scanning_beam_delpmaspu_.mp4" type="video/mp4" />
+      </video>
+
+      {/* Gradient overlay */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 1,
+        background: 'linear-gradient(135deg, rgba(6,8,16,0.78) 0%, rgba(6,8,16,0.5) 50%, rgba(6,8,16,0.72) 100%)',
+      }} />
+
+      {/* Vignette */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 2,
+        background: 'radial-gradient(ellipse at center, transparent 30%, rgba(6,8,16,0.8) 100%)',
+      }} />
+
+      {/* Grid pattern */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 3,
+        backgroundImage:
+          'linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),' +
+          'linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px)',
+        backgroundSize: '60px 60px',
+      }} />
+
+      {/* Scan line */}
+      <div className="scan-line" style={{ zIndex: 4 }} />
+
+      {/* Corner decorations */}
+      <div style={{ position: 'absolute', top: 24, left: 24, zIndex: 4 }}>
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+          <path d="M0 60 L0 0 L60 0" stroke="rgba(0,212,255,0.4)" strokeWidth="1.5" fill="none"/>
+          <path d="M0 40 L0 0 L40 0" stroke="rgba(0,212,255,0.2)" strokeWidth="0.5" fill="none"/>
+        </svg>
+      </div>
+      <div style={{ position: 'absolute', bottom: 24, right: 24, zIndex: 4 }}>
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+          <path d="M60 0 L60 60 L0 60" stroke="rgba(0,212,255,0.4)" strokeWidth="1.5" fill="none"/>
+          <path d="M60 20 L60 60 L20 60" stroke="rgba(0,212,255,0.2)" strokeWidth="0.5" fill="none"/>
+        </svg>
+      </div>
+
+      {/* ── Content ── */}
+      <div style={{
+        position: 'relative', zIndex: 10,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: 24, padding: '48px 24px', maxWidth: 860, textAlign: 'center',
+      }}>
+        {/* Badge */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '8px 18px', borderRadius: 100,
+          background: 'rgba(200,121,65,0.08)',
+          border: '1px solid rgba(200,121,65,0.25)',
+          backdropFilter: 'blur(10px)',
+          animation: 'fadeInDown 0.8s ease both',
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%', background: '#c87941',
+            animation: 'copperPulse 2s ease-in-out infinite',
+          }} />
+          <span style={{
+            fontSize: '0.78rem', fontWeight: 600, letterSpacing: '0.1em',
+            textTransform: 'uppercase', color: 'rgba(200,121,65,0.9)',
+          }}>
+            Start Free 14-Day Trial
+          </span>
         </div>
 
-        {/* Glass card */}
-        <div
-          style={{
-            background: 'rgba(8,12,20,0.82)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            border: '1px solid rgba(0,212,255,0.1)',
-            borderRadius: '16px',
-            boxShadow: '0 30px 80px rgba(0,0,0,0.55), 0 0 60px rgba(0,212,255,0.03)',
-            padding: '36px',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
+        {/* Headline */}
+        <h1 style={{
+          display: 'flex', flexDirection: 'column', gap: 4,
+          animation: 'fadeInUp 1s ease 0.2s both',
+        }}>
+          <span style={{
+            fontFamily: 'Orbitron, monospace',
+            fontSize: 'clamp(1.6rem, 4vw, 3rem)',
+            fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
+            color: '#ffffff',
+            textShadow: '0 0 60px rgba(0,212,255,0.3)',
+          }}>
+            Build Your
+          </span>
+          <span style={{
+            fontFamily: 'Orbitron, monospace',
+            fontSize: 'clamp(1.6rem, 4vw, 3rem)',
+            fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
+            background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 60%, #c87941 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>
+            Inspection Armor
+          </span>
+        </h1>
+
+        {/* Glass form card */}
+        <div style={{
+          width: '100%', maxWidth: 440,
+          background: 'rgba(8,12,20,0.72)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(0,212,255,0.12)',
+          borderRadius: 16,
+          boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,212,255,0.04)',
+          padding: '28px 26px',
+          position: 'relative',
+          overflow: 'hidden',
+          textAlign: 'left',
+          animation: 'fadeInUp 1s ease 0.4s both',
+        }}>
+          {/* Top accent line */}
           <div style={{
-            position: 'absolute', top: 0, left: '10%', right: '10%', height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.4), transparent)',
+            position: 'absolute', top: 0, left: '10%', right: '10%', height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(200,121,65,0.35), rgba(0,212,255,0.35), transparent)',
           }} />
 
-          <div style={{ marginBottom: '24px' }}>
-            <h1
-              style={{
-                fontFamily: 'Orbitron, monospace',
-                fontSize: '1.05rem', fontWeight: 800,
-                color: '#eef2f7', letterSpacing: '0.04em',
-              }}
-            >
-              Create Account
-            </h1>
-            <p style={{ color: '#8fa3b8', fontSize: '0.82rem', marginTop: '5px' }}>
-              Set up your inspection workspace
-            </p>
-          </div>
-
-          {/* Success banner */}
           {successMsg && (
             <div style={{
-              marginBottom: '16px', padding: '12px 14px',
+              marginBottom: 16, padding: '12px 14px',
               background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.25)',
-              borderRadius: '8px', fontSize: '0.82rem', color: '#a0cfdf', lineHeight: 1.5,
+              borderRadius: 8, fontSize: '0.82rem', color: '#a0cfdf', lineHeight: 1.5,
             }}>
-              ✓ {successMsg}
-              <div style={{ marginTop: '10px' }}>
+              {successMsg}
+              <div style={{ marginTop: 10 }}>
                 <Link to="/login" style={{ color: '#00d4ff', fontWeight: 600, textDecoration: 'none' }}>
-                  Go to Login →
+                  Go to Login
                 </Link>
               </div>
             </div>
           )}
 
-          {/* Error banner */}
           {serverError && (
             <div style={{
-              marginBottom: '16px', padding: '10px 14px',
+              marginBottom: 16, padding: '10px 14px',
               background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.25)',
-              borderRadius: '8px', fontSize: '0.8rem', color: '#ff8080',
+              borderRadius: 8, fontSize: '0.8rem', color: '#ff8080',
             }}>
               {serverError}
             </div>
           )}
 
           {!successMsg && (
-            <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {FIELDS.map(({ name, label, type, placeholder }) => (
                 <div key={name}>
-                  <label
-                    style={{
-                      display: 'block', marginBottom: '6px',
-                      fontSize: '0.72rem', fontWeight: 600,
-                      color: '#8fa3b8', letterSpacing: '0.06em', textTransform: 'uppercase',
-                    }}
-                  >
+                  <label style={{
+                    display: 'block', marginBottom: 6,
+                    fontSize: '0.72rem', fontWeight: 600,
+                    color: '#8fa3b8', letterSpacing: '0.06em', textTransform: 'uppercase',
+                  }}>
                     {label}
                   </label>
                   <input
@@ -178,16 +210,17 @@ export default function SignupPage() {
                     placeholder={placeholder}
                     className="input-glass"
                     required
+                    style={{ width: '100%' }}
                   />
                 </div>
               ))}
 
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', marginTop: '4px' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', marginTop: 2 }}>
                 <input
                   type="checkbox"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  style={{ accentColor: '#00d4ff', width: '13px', height: '13px', marginTop: '2px', flexShrink: 0 }}
+                  style={{ accentColor: '#00d4ff', width: 13, height: 13, marginTop: 2, flexShrink: 0 }}
                 />
                 <span style={{ fontSize: '0.75rem', color: '#8fa3b8', lineHeight: 1.5 }}>
                   I agree to the{' '}
@@ -201,14 +234,14 @@ export default function SignupPage() {
                 type="submit"
                 className="btn-primary"
                 disabled={isPending || !agreed}
-                style={{ opacity: (isPending || !agreed) ? 0.55 : 1, marginTop: '4px' }}
+                style={{ width: '100%', justifyContent: 'center', opacity: (isPending || !agreed) ? 0.55 : 1 }}
               >
                 {isPending ? (
                   <>
                     <svg className="animate-spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                     </svg>
-                    Creating workspace…
+                    Creating workspace...
                   </>
                 ) : (
                   <>
@@ -223,24 +256,38 @@ export default function SignupPage() {
             </form>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(143,163,184,0.1)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '18px 0' }}>
+            <div style={{ flex: 1, height: 1, background: 'rgba(143,163,184,0.1)' }} />
             <span style={{ fontSize: '0.7rem', color: '#3d4f63' }}>or</span>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(143,163,184,0.1)' }} />
+            <div style={{ flex: 1, height: 1, background: 'rgba(143,163,184,0.1)' }} />
           </div>
 
           <p style={{ textAlign: 'center', fontSize: '0.82rem', color: '#8fa3b8' }}>
             Already have an account?{' '}
             <Link to="/login" style={{ color: '#00d4ff', textDecoration: 'none', fontWeight: 600 }}>
-              Sign in →
+              Sign in
             </Link>
           </p>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.68rem', color: '#3d4f63', letterSpacing: '0.03em' }}>
-          No credit card required · Cancel anytime · GDPR compliant
-        </p>
+        {/* Trust badges */}
+        <div style={{
+          display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center',
+          animation: 'fadeInUp 1s ease 0.6s both',
+        }}>
+          {['No Credit Card Required', 'Cancel Anytime', 'GDPR Compliant'].map((item) => (
+            <div key={item} style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              fontSize: '0.8rem', fontWeight: 600,
+              color: 'rgba(143,163,184,0.7)',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+            }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(200,121,65,0.6)' }} />
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   )
 }

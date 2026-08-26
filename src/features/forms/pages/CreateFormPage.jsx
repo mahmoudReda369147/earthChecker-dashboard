@@ -551,6 +551,9 @@ export default function CreateFormPage() {
     const s = makeSection(type)
     setSections((prev) => [...prev, s])
     setActiveIdx(sections.length)
+    if (sectionErrors._empty) {
+      setSectionErrors((prev) => { const n = { ...prev }; delete n._empty; return n })
+    }
   }
 
   const updateSection = (idx, updated) =>
@@ -588,6 +591,12 @@ export default function CreateFormPage() {
       valid = false
     } else {
       setFormTitleError(false)
+    }
+
+    if (sections.length === 0) {
+      setSectionErrors({ _empty: 'At least one question is required' })
+      valid = false
+      return valid
     }
 
     sections.forEach((s) => {
@@ -767,6 +776,12 @@ export default function CreateFormPage() {
               onMoveDown={() => moveSection(idx, 1)}
             />
           ))}
+
+          {sectionErrors._empty && (
+            <p className="flex items-center justify-center gap-1.5 py-3 text-[0.78rem] text-copper">
+              <AlertTriangle size={13} /> {sectionErrors._empty}
+            </p>
+          )}
 
           {/* Add question inline */}
           <button

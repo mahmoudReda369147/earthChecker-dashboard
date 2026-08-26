@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom'
 import api from '../../../lib/axios'
 import { AUTH_ENDPOINTS } from '../endpoints'
 
-/* Possible states: idle | loading | success | already_verified | expired | error */
 function useVerifyEmail(token) {
   const [state, setState] = useState('loading')
   const [message, setMessage] = useState('')
@@ -41,7 +40,7 @@ const CFG = {
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>
     ),
-    title: 'Verifying…',
+    title: 'Verifying...',
     body:  'Please wait while we verify your email address.',
     accent: '0,212,255',
     action: null,
@@ -56,7 +55,7 @@ const CFG = {
     title: 'Email Verified!',
     body:  'Your account is now active. You can sign in.',
     accent: '0,212,255',
-    action: { to: '/login', label: 'Sign In →' },
+    action: { to: '/login', label: 'Sign In' },
   },
   already_verified: {
     icon: (
@@ -68,7 +67,7 @@ const CFG = {
     title: 'Already Verified',
     body:  'Your email is already confirmed. Go ahead and sign in.',
     accent: '0,212,255',
-    action: { to: '/login', label: 'Sign In →' },
+    action: { to: '/login', label: 'Sign In' },
   },
   expired: {
     icon: (
@@ -100,60 +99,116 @@ export default function VerifyEmailPage() {
   const { token } = useParams()
   const { state, message } = useVerifyEmail(token)
   const cfg = CFG[state] || CFG.error
+  const isCyan = cfg.accent === '0,212,255'
 
   return (
-    <div
-      className="grid-overlay"
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        position: 'relative',
-      }}
-    >
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
-          background: `radial-gradient(ellipse 70% 55% at 50% 45%, rgba(${cfg.accent},0.06) 0%, transparent 65%)`,
-        }}
-      />
-      <div className="scan-line" style={{ zIndex: 1 }} />
+    <section style={{
+      position: 'relative', width: '100%', height: '100vh', minHeight: 700,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+    }}>
+      {/* ── Background Video ── */}
+      <video
+        autoPlay muted loop playsInline poster="/background.png"
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
+      >
+        <source src="/assets/videos/Flow_delpmaspu_2.mp4" type="video/mp4" />
+      </video>
 
-      <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '420px', animation: 'fadeInUp 0.4s ease both' }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <img src="/logo.svg" alt="Feedbrush" style={{ height: '40px', filter: 'drop-shadow(0 0 10px rgba(0,212,255,0.4))' }} />
+      {/* Overlays */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 1,
+        background: 'linear-gradient(135deg, rgba(6,8,16,0.78) 0%, rgba(6,8,16,0.5) 50%, rgba(6,8,16,0.72) 100%)',
+      }} />
+      <div style={{ position: 'absolute', inset: 0, zIndex: 2,
+        background: 'radial-gradient(ellipse at center, transparent 30%, rgba(6,8,16,0.85) 100%)',
+      }} />
+      <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
+        backgroundImage:
+          'linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),' +
+          'linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px)',
+        backgroundSize: '60px 60px',
+      }} />
+      <div className="scan-line" style={{ zIndex: 4 }} />
+
+      {/* Corners */}
+      <div style={{ position: 'absolute', top: 24, left: 24, zIndex: 4 }}>
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+          <path d="M0 60 L0 0 L60 0" stroke={`rgba(${cfg.accent},0.4)`} strokeWidth="1.5" fill="none"/>
+          <path d="M0 40 L0 0 L40 0" stroke={`rgba(${cfg.accent},0.2)`} strokeWidth="0.5" fill="none"/>
+        </svg>
+      </div>
+      <div style={{ position: 'absolute', bottom: 24, right: 24, zIndex: 4 }}>
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+          <path d="M60 0 L60 60 L0 60" stroke={`rgba(${cfg.accent},0.4)`} strokeWidth="1.5" fill="none"/>
+          <path d="M60 20 L60 60 L20 60" stroke={`rgba(${cfg.accent},0.2)`} strokeWidth="0.5" fill="none"/>
+        </svg>
+      </div>
+
+      {/* ── Content ── */}
+      <div style={{
+        position: 'relative', zIndex: 10,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: 28, padding: '0 24px', maxWidth: 860, textAlign: 'center',
+      }}>
+        {/* Badge */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '8px 18px', borderRadius: 100,
+          background: `rgba(${cfg.accent},0.07)`,
+          border: `1px solid rgba(${cfg.accent},0.25)`,
+          backdropFilter: 'blur(10px)',
+          animation: 'fadeInDown 0.8s ease both',
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: isCyan ? '#00d4ff' : '#c87941',
+            animation: isCyan ? 'pulseGlow 2s ease-in-out infinite' : 'copperPulse 2s ease-in-out infinite',
+          }} />
+          <span style={{
+            fontSize: '0.78rem', fontWeight: 600, letterSpacing: '0.1em',
+            textTransform: 'uppercase', color: `rgba(${cfg.accent},0.9)`,
+          }}>
+            Email Verification
+          </span>
         </div>
 
-        <div
-          style={{
-            background: 'rgba(8,12,20,0.85)',
-            backdropFilter: 'blur(24px)',
-            border: `1px solid rgba(${cfg.accent},0.15)`,
-            borderRadius: '16px',
-            boxShadow: `0 30px 80px rgba(0,0,0,0.55), 0 0 60px rgba(${cfg.accent},0.04)`,
-            padding: '40px 36px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '16px',
-            textAlign: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
+        {/* Headline */}
+        <h1 style={{
+          display: 'flex', flexDirection: 'column', gap: 4,
+          animation: 'fadeInUp 1s ease 0.2s both',
+        }}>
+          <span style={{
+            fontFamily: 'Orbitron, monospace',
+            fontSize: 'clamp(1.8rem, 4.5vw, 3.4rem)',
+            fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
+            color: '#ffffff', textShadow: `0 0 60px rgba(${cfg.accent},0.3)`,
+          }}>
+            {cfg.title}
+          </span>
+        </h1>
+
+        {/* Glass card */}
+        <div style={{
+          width: '100%', maxWidth: 440,
+          background: 'rgba(8,12,20,0.72)',
+          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+          border: `1px solid rgba(${cfg.accent},0.12)`,
+          borderRadius: 16,
+          boxShadow: `0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(${cfg.accent},0.04)`,
+          padding: '40px 32px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          gap: 16, textAlign: 'center',
+          position: 'relative', overflow: 'hidden',
+          animation: 'fadeInUp 1s ease 0.4s both',
+        }}>
           <div style={{
-            position: 'absolute', top: 0, left: '10%', right: '10%', height: '1px',
+            position: 'absolute', top: 0, left: '10%', right: '10%', height: 1,
             background: `linear-gradient(90deg, transparent, rgba(${cfg.accent},0.4), transparent)`,
           }} />
 
           {/* Icon */}
           <div style={{
-            width: '80px', height: '80px', borderRadius: '50%', display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
+            width: 80, height: 80, borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: `rgba(${cfg.accent},0.06)`,
             border: `1px solid rgba(${cfg.accent},0.2)`,
             boxShadow: `0 0 24px rgba(${cfg.accent},0.12)`,
@@ -161,40 +216,39 @@ export default function VerifyEmailPage() {
             {cfg.icon}
           </div>
 
-          <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '1.15rem', fontWeight: 800, color: '#eef2f7', letterSpacing: '0.02em' }}>
-            {cfg.title}
-          </h1>
-
-          <p style={{ fontSize: '0.85rem', color: '#8fa3b8', lineHeight: 1.6, maxWidth: '300px' }}>
+          <p style={{ fontSize: '0.88rem', color: '#8fa3b8', lineHeight: 1.6, maxWidth: 320 }}>
             {message || cfg.body}
           </p>
 
           {cfg.action && (
             <Link
               to={cfg.action.to}
-              style={{
-                marginTop: '8px',
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                padding: '11px 28px',
-                borderRadius: '8px',
-                background: `rgba(${cfg.accent},0.12)`,
-                border: `1px solid rgba(${cfg.accent},0.35)`,
-                color: state === 'expired' || state === 'error' ? '#c87941' : '#00d4ff',
-                fontFamily: 'Orbitron, monospace',
-                fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em',
-                textDecoration: 'none',
-                transition: 'all 0.2s',
-              }}
+              className="btn-primary"
+              style={{ marginTop: 8, textDecoration: 'none', justifyContent: 'center' }}
             >
               {cfg.action.label}
             </Link>
           )}
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.68rem', color: '#3d4f63' }}>
-          End-to-end encrypted · AI Quality Platform
-        </p>
+        {/* Trust badges */}
+        <div style={{
+          display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center',
+          animation: 'fadeInUp 1s ease 0.6s both',
+        }}>
+          {['End-to-End Encrypted', 'AI Quality Platform'].map((item) => (
+            <div key={item} style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              fontSize: '0.8rem', fontWeight: 600,
+              color: 'rgba(143,163,184,0.7)',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+            }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: `rgba(${cfg.accent},0.6)` }} />
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   )
 }

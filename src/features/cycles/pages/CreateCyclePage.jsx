@@ -142,11 +142,12 @@ export default function CreateCyclePage() {
   const { data: modulesData, isLoading: loadingModules } =
     useModules({ limit: 200, isDeleted: false })
 
-  const { data: staffData, isLoading: loadingStaff } =
-    useStaff({ role: 'supervisor', limit: 200 })
+  const { data: staffData,   isLoading: loadingStaff   } = useStaff({ role: 'supervisor', limit: 200 })
+  const { data: workersData, isLoading: loadingWorkers } = useStaff({ role: 'worker',     limit: 200 })
 
-  const modules     = modulesData?.modules     ?? []
-  const supervisors = staffData?.staff         ?? []
+  const modules     = modulesData?.modules   ?? []
+  const supervisors = staffData?.staff       ?? []
+  const workers     = workersData?.staff     ?? []
 
   /* ── Mutations ── */
   const { mutateAsync: createCycle, isPending: creating } = useCreateCycle()
@@ -157,6 +158,7 @@ export default function CreateCyclePage() {
     name:               '',
     moduleId:           '',
     assignedSupervisor: '',
+    assignedWorker:     '',
     status:             'new',
   })
   const [error, setError] = useState('')
@@ -166,9 +168,10 @@ export default function CreateCyclePage() {
     if (cycleData) {
       setForm({
         name:               cycleData.name               ?? '',
-        moduleId:           cycleData.moduleId?._id      ?? cycleData.moduleId ?? '',
+        moduleId:           cycleData.moduleId?._id           ?? cycleData.moduleId           ?? '',
         assignedSupervisor: cycleData.assignedSupervisor?._id ?? cycleData.assignedSupervisor ?? '',
-        status:             cycleData.status             ?? 'new',
+        assignedWorker:     cycleData.assignedWorker?._id     ?? cycleData.assignedWorker     ?? '',
+        status:             cycleData.status ?? 'new',
       })
     }
   }, [cycleData])
@@ -202,6 +205,7 @@ export default function CreateCyclePage() {
         name:     form.name.trim(),
         moduleId: form.moduleId,
         ...(isCeo ? { assignedSupervisor: form.assignedSupervisor } : {}),
+        assignedWorker: form.assignedWorker || null,
       }
 
       if (isEditMode) {
@@ -245,7 +249,7 @@ export default function CreateCyclePage() {
           <div className="hidden lg:block w-[260px] shrink-0">
             <CyclePreview
               form={form}
-              moduleName={selectedModule?.name}
+              moduleName={selectedModule?.title || selectedModule?.name}
               supervisorName={selectedSupervisor?.name}
             />
           </div>
@@ -293,7 +297,7 @@ export default function CreateCyclePage() {
                         onChange={set('moduleId')}
                         placeholder="— Select a module —"
                         disabled={isEditMode && form.status !== 'new'}
-                        options={modules.map((m) => ({ value: m._id, label: m.name }))}
+                        options={modules.map((m) => ({ value: m._id, label: m.title || m.name }))}
                       />
                     )}
                   </Field>
@@ -331,6 +335,7 @@ export default function CreateCyclePage() {
                   </span>
                 </div>
 
+                <div className="space-y-4">
                 {isCeo ? (
                   /* CEO picks supervisor */
                   <Field label="Assigned Supervisor" required>
@@ -368,6 +373,27 @@ export default function CreateCyclePage() {
                     <span className="ml-auto text-[0.68rem] text-text-muted italic">Auto-assigned</span>
                   </div>
                 )}
+
+                {/* Worker assignment (CEO + Supervisor) */}
+                <Field label="Assigned Worker" hint="Optional — can also be assigned later.">
+                  {loadingWorkers ? (
+                    <div className="input-glass flex items-center gap-2 opacity-60">
+                      <Loader2 size={12} className="animate-spin text-cyan" />
+                      <span className="text-[0.78rem] text-text-muted">Loading workers…</span>
+                    </div>
+                  ) : (
+                    <Dropdown
+                      value={form.assignedWorker}
+                      onChange={set('assignedWorker')}
+                      placeholder="— Select a worker (optional) —"
+                      options={[
+                        { value: '', label: 'None' },
+                        ...workers.map((w) => ({ value: w._id, label: `${w.name} (${w.email})` })),
+                      ]}
+                    />
+                  )}
+                </Field>
+                </div>
               </div>
             </div>
 

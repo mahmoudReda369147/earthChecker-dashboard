@@ -24,7 +24,10 @@ import UpdateAgentPage  from './features/agents/pages/UpdateAgentPage'
 import CyclesPage       from './features/cycles/pages/CyclesPage'
 import CreateCyclePage  from './features/cycles/pages/CreateCyclePage'
 import CycleDetailPage  from './features/cycles/pages/CycleDetailPage'
+import CycleStagesPage  from './features/cycles/pages/CycleStagesPage'
+import StageSubmitPage  from './features/cycles/pages/StageSubmitPage'
 import SubmissionsPage  from './features/submissions/pages/SubmissionsPage'
+import SubmissionAnalysesPage from './features/analyses/pages/SubmissionAnalysesPage'
 import SettingsPage     from './features/settings/pages/SettingsPage'
 
 /* ── Layout & auth guard ── */
@@ -45,6 +48,7 @@ export default function App() {
         {/* Standalone — no dashboard chrome */}
         <Route path="/form-preview"          element={<FormPreviewPage />} />
         <Route path="/form-preview/:formId"  element={<FormPreviewPage />} />
+        <Route path="/stage-submit/:stageId" element={<StageSubmitPage />} />
 
         {/* Protected dashboard — requires valid session */}
         <Route element={<ProtectedRoute />}>
@@ -68,7 +72,9 @@ export default function App() {
             <Route path="cycles/create"           element={<CreateCyclePage />} />
             <Route path="cycles/:cycleId"         element={<CycleDetailPage />} />
             <Route path="cycles/:cycleId/edit"    element={<CreateCyclePage />} />
+            <Route path="cycles/:cycleId/stages"  element={<CycleStagesPage />} />
             <Route path="submissions"           element={<SubmissionsPage />} />
+            <Route path="submissions/:submissionId/analyses" element={<SubmissionAnalysesPage />} />
             <Route path="settings"              element={<SettingsPage />} />
           </Route>
         </Route>

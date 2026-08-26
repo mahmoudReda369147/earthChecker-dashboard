@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   Loader2, AlertTriangle, ArrowLeft, Pencil,
   Pause, RotateCcw, XCircle, RefreshCw, AlertOctagon,
-  GitBranch, User, Calendar, CalendarClock,
+  GitBranch, User, Calendar, CalendarClock, Layers,
 } from 'lucide-react'
 import PageHeader from '../../../components/ui/PageHeader'
 import Modal      from '../../../components/ui/Modal'
@@ -169,15 +169,24 @@ export default function CycleDetailPage() {
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: st.color }} />
               {st.label}
             </span>
-            {!isTerminal && (isCeo || isSupervisor) && (
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => navigate(`/dashboard/cycles/${cycleId}/edit`)}
+                onClick={() => navigate(`/dashboard/cycles/${cycleId}/stages`)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[0.72rem] font-semibold transition-all
-                  text-steel border-[rgba(143,163,184,0.2)] hover:border-[rgba(0,212,255,0.4)] hover:text-cyan"
+                  text-cyan border-[rgba(0,212,255,0.2)] hover:border-[rgba(0,212,255,0.5)] hover:bg-[rgba(0,212,255,0.06)]"
               >
-                <Pencil size={12} /> Edit
+                <Layers size={12} /> Stages
               </button>
-            )}
+              {!isTerminal && (isCeo || isSupervisor) && (
+                <button
+                  onClick={() => navigate(`/dashboard/cycles/${cycleId}/edit`)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[0.72rem] font-semibold transition-all
+                    text-steel border-[rgba(143,163,184,0.2)] hover:border-[rgba(0,212,255,0.4)] hover:text-cyan"
+                >
+                  <Pencil size={12} /> Edit
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Progress */}
