@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { useResetPassword } from '../apiHooks'
 
 export default function ResetPasswordPage() {
   const { token } = useParams()
   const { mutate: resetPassword, isPending } = useResetPassword()
 
-  const [password, setPassword]   = useState('')
-  const [confirm, setConfirm]     = useState('')
-  const [success, setSuccess]     = useState(false)
-  const [error, setError]         = useState(null)
+  const [password, setPassword]       = useState('')
+  const [confirm, setConfirm]         = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm]   = useState(false)
+  const [success, setSuccess]         = useState(false)
+  const [error, setError]             = useState(null)
 
   const mismatch   = confirm.length > 0 && password !== confirm
   const tooShort   = password.length > 0 && password.length < 8
@@ -31,8 +34,8 @@ export default function ResetPasswordPage() {
 
   return (
     <section style={{
-      position: 'relative', width: '100%', height: '100vh', minHeight: 700,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+      position: 'relative', width: '100%', minHeight: '100vh', height: '100vh',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto',
     }}>
       {/* ── Background Video ── */}
       <video
@@ -75,7 +78,7 @@ export default function ResetPasswordPage() {
       <div style={{
         position: 'relative', zIndex: 10,
         display: 'flex', flexDirection: 'column', alignItems: 'center',
-        gap: 28, padding: '0 24px', maxWidth: 860, textAlign: 'center',
+        gap: 20, padding: '24px 24px', maxWidth: 860, textAlign: 'center', margin: 'auto',
       }}>
         {/* Badge */}
         <div style={{
@@ -132,7 +135,7 @@ export default function ResetPasswordPage() {
           border: '1px solid rgba(0,212,255,0.12)',
           borderRadius: 16,
           boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,212,255,0.04)',
-          padding: '32px 28px',
+          padding: '24px 26px',
           position: 'relative', overflow: 'hidden', textAlign: 'left',
           animation: 'fadeInUp 1s ease 0.4s both',
         }}>
@@ -173,7 +176,7 @@ export default function ResetPasswordPage() {
             </div>
           ) : (
             <>
-              <p style={{ color: '#8fa3b8', fontSize: '0.82rem', marginBottom: 20 }}>
+              <p style={{ color: '#8fa3b8', fontSize: '0.82rem', marginBottom: 16 }}>
                 Must be at least 8 characters. All sessions will be signed out.
               </p>
 
@@ -190,7 +193,7 @@ export default function ResetPasswordPage() {
                 </div>
               )}
 
-              <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>
                   <label style={{
                     display: 'block', marginBottom: 6,
@@ -199,13 +202,39 @@ export default function ResetPasswordPage() {
                   }}>
                     New Password
                   </label>
-                  <input
-                    type="password" value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min. 8 characters"
-                    className="input-glass" required
-                    style={{ width: '100%' }}
-                  />
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Min. 8 characters"
+                      className="input-glass" required
+                      style={{ width: '100%', paddingRight: 38 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      title={showPassword ? 'Hide password' : 'Show password'}
+                      style={{
+                        position: 'absolute',
+                        right: 12,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        color: '#8fa3b8',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justify: 'center',
+                        padding: 0,
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = '#00d4ff')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = '#8fa3b8')}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                   {tooShort && (
                     <p style={{ marginTop: 5, fontSize: '0.72rem', color: '#c87941' }}>
                       Password must be at least 8 characters.
@@ -221,13 +250,39 @@ export default function ResetPasswordPage() {
                   }}>
                     Confirm Password
                   </label>
-                  <input
-                    type="password" value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    placeholder="Repeat new password"
-                    className="input-glass" required
-                    style={{ width: '100%', borderColor: mismatch ? 'rgba(200,121,65,0.5)' : undefined }}
-                  />
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <input
+                      type={showConfirm ? 'text' : 'password'}
+                      value={confirm}
+                      onChange={(e) => setConfirm(e.target.value)}
+                      placeholder="Repeat new password"
+                      className="input-glass" required
+                      style={{ width: '100%', paddingRight: 38, borderColor: mismatch ? 'rgba(200,121,65,0.5)' : undefined }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      title={showConfirm ? 'Hide password' : 'Show password'}
+                      style={{
+                        position: 'absolute',
+                        right: 12,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        color: '#8fa3b8',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justify: 'center',
+                        padding: 0,
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = '#00d4ff')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = '#8fa3b8')}
+                    >
+                      {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                   {mismatch && (
                     <p style={{ marginTop: 5, fontSize: '0.72rem', color: '#c87941' }}>
                       Passwords do not match.

@@ -37,7 +37,14 @@ export default function CreateAgentPage() {
   const navigate = useNavigate()
   const { mutateAsync: createAgent, isPending } = useCreateAgent()
 
-  const [form, setForm] = useState({ name: '', description: '', userPrompt: '', tolerance: 50 })
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    userPrompt: '',
+    tolerance: 50,
+    complianceThreshold: 80,
+    criticalInspection: true,
+  })
   const [files, setFiles] = useState({ image: null, passImage: null, failImage: null, thinkingImage: null })
 
   const set     = (k, v) => setForm(p => ({ ...p, [k]: v }))
@@ -46,10 +53,12 @@ export default function CreateAgentPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const fd = new FormData()
-    fd.append('name',        form.name)
-    fd.append('description', form.description)
-    fd.append('userPrompt',  form.userPrompt)
-    fd.append('tolerance',   form.tolerance)
+    fd.append('name',                form.name)
+    fd.append('description',         form.description)
+    fd.append('userPrompt',          form.userPrompt)
+    fd.append('tolerance',           form.tolerance)
+    fd.append('complianceThreshold', form.complianceThreshold)
+    fd.append('criticalInspection',  form.criticalInspection)
     if (files.image)         fd.append('image',          files.image)
     if (files.passImage)     fd.append('passImage',      files.passImage)
     if (files.failImage)     fd.append('failImage',      files.failImage)
@@ -143,6 +152,46 @@ export default function CreateAgentPage() {
                 className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
                 style={{ background: `linear-gradient(to right, #00d4ff ${(form.tolerance - 50) * 2}%, rgba(143,163,184,0.15) ${(form.tolerance - 50) * 2}%)` }} />
             </div>
+          </div>
+
+          {/* Compliance Threshold */}
+          <div className="rounded-xl bg-bg-glass border border-[rgba(143,163,184,0.1)] p-5 space-y-4">
+            <div>
+              <h2 className="text-[0.8rem] font-bold text-text-primary font-orbitron tracking-wide">Compliance Threshold</h2>
+              <p className="text-[0.7rem] text-steel mt-0.5">Required compliance percentage rate</p>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[0.7rem] text-steel">0%</span>
+                <span className="font-orbitron text-[1.3rem] font-bold text-cyan">{form.complianceThreshold}%</span>
+                <span className="text-[0.7rem] text-steel">100%</span>
+              </div>
+              <input type="range" min={0} max={100} step={1} value={form.complianceThreshold}
+                onChange={e => set('complianceThreshold', Number(e.target.value))}
+                className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                style={{ background: `linear-gradient(to right, #00d4ff ${form.complianceThreshold}%, rgba(143,163,184,0.15) ${form.complianceThreshold}%)` }} />
+            </div>
+          </div>
+
+          {/* Critical Inspection Switch */}
+          <div className="rounded-xl bg-bg-glass border border-[rgba(143,163,184,0.1)] p-5 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-[0.8rem] font-bold text-text-primary font-orbitron tracking-wide">Critical Inspection</h2>
+              <p className="text-[0.7rem] text-steel mt-0.5">Flag inspection as critical</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => set('criticalInspection', !form.criticalInspection)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                form.criticalInspection ? 'bg-cyan' : 'bg-[rgba(143,163,184,0.2)]'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[#060810] shadow-lg ring-0 transition duration-200 ease-in-out ${
+                  form.criticalInspection ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
 
           {/* Preview */}

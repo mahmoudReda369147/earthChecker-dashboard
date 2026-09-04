@@ -14,8 +14,8 @@ export const getModuleService = (id) =>
   api.get(MODULES_ENDPOINTS.GET(id)).then((r) => r.data)
 
 /** PATCH /api/modules/:id */
-export const updateModuleService = ({ id, ...body }) =>
-  api.patch(MODULES_ENDPOINTS.UPDATE(id), body).then((r) => r.data)
+export const updateModuleService = ({ id, data, ...rest }) =>
+  api.patch(MODULES_ENDPOINTS.UPDATE(id), data || rest).then((r) => r.data)
 
 /** DELETE /api/modules/:id  (soft delete) */
 export const deleteModuleService = (id) =>

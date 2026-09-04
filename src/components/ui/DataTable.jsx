@@ -90,7 +90,8 @@ export default function DataTable({
                   {columns.map((col, i) => (
                     <td
                       key={col.key}
-                      className={`px-5 py-4 ${i < columns.length - 1 ? 'border-r border-r-[rgba(143,163,184,0.07)]' : ''} ${alignClass(col.align)}`}
+                      style={col.width ? { width: col.width, minWidth: col.width } : undefined}
+                      className={`px-5 py-4 whitespace-nowrap ${i < columns.length - 1 ? 'border-r border-r-[rgba(143,163,184,0.07)]' : ''} ${alignClass(col.align)}`}
                     >
                       {renderCell(col.key, row, rowIndex)}
                     </td>

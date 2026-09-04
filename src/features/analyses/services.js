@@ -6,3 +6,6 @@ export const getSubmissionAnalysesService = (submissionId) =>
 
 export const rateAnalysisService = ({ analysisId, action }) =>
   api.patch(ANALYSES_ENDPOINTS.RATE(analysisId), { action }).then((r) => r.data)
+
+export const updateAnalysisProblemTypeService = ({ analysisId, problemType }) =>
+  api.patch(ANALYSES_ENDPOINTS.PROBLEM_TYPE(analysisId), { problemType }).then((r) => r.data)

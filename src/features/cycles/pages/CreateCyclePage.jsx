@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   Loader2, ArrowLeft, Plus, Save,
   RotateCcw, User,
-  GitBranch, AlertCircle,
+  GitBranch, AlertCircle, Boxes, DollarSign, Hash,
 } from 'lucide-react'
 import PageHeader     from '../../../components/ui/PageHeader'
 import Dropdown       from '../../../components/ui/Dropdown'
@@ -72,8 +72,33 @@ function CyclePreview({ form, moduleName, supervisorName }) {
                 {supervisorName || 'No supervisor'}
               </span>
             </div>
+
+            {/* Batch & Cost Metrics in Preview */}
+            {(form.totalBatchSize !== '' || form.sampleSize !== '' || form.unitCost !== '') && (
+              <div className="pt-2 border-t border-[rgba(143,163,184,0.07)] space-y-1 text-[0.7rem]">
+                {form.totalBatchSize !== '' && (
+                  <div className="flex justify-between items-center text-steel">
+                    <span>Batch Size:</span>
+                    <span className="font-orbitron font-bold text-text-primary">{form.totalBatchSize}</span>
+                  </div>
+                )}
+                {form.sampleSize !== '' && (
+                  <div className="flex justify-between items-center text-steel">
+                    <span>Sample Size:</span>
+                    <span className="font-orbitron font-bold text-cyan">{form.sampleSize}</span>
+                  </div>
+                )}
+                {form.unitCost !== '' && (
+                  <div className="flex justify-between items-center text-steel">
+                    <span>Unit Cost:</span>
+                    <span className="font-orbitron font-bold text-emerald-400">${form.unitCost}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Progress bar */}
-            <div className="space-y-1">
+            <div className="space-y-1 pt-1">
               <div className="flex justify-between items-center">
                 <span className="text-[0.68rem] text-text-muted">Progress</span>
                 <span className="font-orbitron text-[0.68rem] font-bold text-cyan">{form.progress ?? 0}%</span>
@@ -160,6 +185,9 @@ export default function CreateCyclePage() {
     assignedSupervisor: '',
     assignedWorker:     '',
     status:             'new',
+    totalBatchSize:     '',
+    sampleSize:         '',
+    unitCost:           '',
   })
   const [error, setError] = useState('')
 
@@ -172,6 +200,9 @@ export default function CreateCyclePage() {
         assignedSupervisor: cycleData.assignedSupervisor?._id ?? cycleData.assignedSupervisor ?? '',
         assignedWorker:     cycleData.assignedWorker?._id     ?? cycleData.assignedWorker     ?? '',
         status:             cycleData.status ?? 'new',
+        totalBatchSize:     cycleData.totalBatchSize     ?? '',
+        sampleSize:         cycleData.sampleSize         ?? '',
+        unitCost:           cycleData.unitCost           ?? '',
       })
     }
   }, [cycleData])
@@ -202,10 +233,13 @@ export default function CreateCyclePage() {
 
     try {
       const payload = {
-        name:     form.name.trim(),
-        moduleId: form.moduleId,
+        name:           form.name.trim(),
+        moduleId:       form.moduleId,
         ...(isCeo ? { assignedSupervisor: form.assignedSupervisor } : {}),
         assignedWorker: form.assignedWorker || null,
+        totalBatchSize: form.totalBatchSize !== '' ? Number(form.totalBatchSize) : 0,
+        sampleSize:     form.sampleSize     !== '' ? Number(form.sampleSize)     : 0,
+        unitCost:       form.unitCost       !== '' ? Number(form.unitCost)       : 0,
       }
 
       if (isEditMode) {
@@ -318,6 +352,68 @@ export default function CreateCyclePage() {
                       })()}
                     </Field>
                   )}
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Batch & Cost Parameters */}
+            <div className="rounded-xl bg-bg-glass backdrop-blur-xl border border-[rgba(0,212,255,0.08)]">
+              <div className="h-[3px] rounded-t-xl bg-gradient-to-r from-cyan via-[rgba(0,180,255,0.5)] to-transparent" />
+              <div className="p-5">
+                <div className="flex items-center gap-2.5 mb-5">
+                  <div className="w-7 h-7 rounded-lg bg-[rgba(0,212,255,0.07)] border border-[rgba(0,212,255,0.14)] flex items-center justify-center">
+                    <Boxes size={13} className="text-cyan" />
+                  </div>
+                  <span className="font-orbitron text-[0.72rem] font-bold text-text-primary tracking-[0.06em]">
+                    Batch &amp; Inspection Parameters
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Field label="Total Batch Size" hint="Total batch quantity produced">
+                    <div className="relative">
+                      <Boxes size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        value={form.totalBatchSize}
+                        onChange={setEv('totalBatchSize')}
+                        placeholder="e.g. 1000"
+                        className="input-glass w-full pl-9"
+                      />
+                    </div>
+                  </Field>
+
+                  <Field label="Sample Size" hint="Quantity sampled for quality check">
+                    <div className="relative">
+                      <Hash size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        value={form.sampleSize}
+                        onChange={setEv('sampleSize')}
+                        placeholder="e.g. 50"
+                        className="input-glass w-full pl-9"
+                      />
+                    </div>
+                  </Field>
+
+                  <Field label="Unit Cost ($)" hint="Cost per item/unit">
+                    <div className="relative">
+                      <DollarSign size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        value={form.unitCost}
+                        onChange={setEv('unitCost')}
+                        placeholder="e.g. 15.50"
+                        className="input-glass w-full pl-9"
+                      />
+                    </div>
+                  </Field>
                 </div>
               </div>
             </div>

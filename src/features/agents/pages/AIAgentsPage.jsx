@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Plus, ThumbsUp, ThumbsDown, Pencil, Trash2,
   ChevronLeft, ChevronRight, Loader2, ImagePlus, AlertTriangle, X,
@@ -85,12 +85,23 @@ function AgentCard({ agent, onEdit, onDelete }) {
 
         {/* Title + description */}
         <div className="space-y-1.5">
-          <h3 className="font-orbitron text-[0.9rem] font-bold text-text-primary leading-snug group-hover:text-cyan transition-colors line-clamp-1">
-            {agent.name}
-          </h3>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-orbitron text-[0.9rem] font-bold text-text-primary leading-snug group-hover:text-cyan transition-colors line-clamp-1">
+              {agent.name}
+            </h3>
+            {agent.criticalInspection && (
+              <span className="px-2 py-0.5 rounded-full bg-[rgba(200,121,65,0.15)] border border-[rgba(200,121,65,0.3)] text-copper text-[0.62rem] font-bold tracking-wide uppercase shrink-0">
+                Critical
+              </span>
+            )}
+          </div>
           <p className="text-[0.76rem] text-steel leading-[1.65] line-clamp-2 min-h-[2.4em]">
             {agent.description || 'No description provided.'}
           </p>
+          <div className="flex items-center gap-2 pt-1 text-[0.68rem] text-text-muted">
+            <span>Compliance Threshold:</span>
+            <span className="font-orbitron font-semibold text-cyan">{agent.complianceThreshold ?? 80}%</span>
+          </div>
         </div>
 
         {/* Stats bar — dark rounded row */}
@@ -198,14 +209,25 @@ function Pagination({ pagination, onPage }) {
 /* ═══════════════════════════════════════════════════════════════ */
 export default function AIAgentsPage() {
   const navigate = useNavigate()
-  const [pageParams, setPageParams]   = useState({ page: 1, limit: 9 })
+  const [searchParams, setSearchParams] = useSearchParams()
+  const page = parseInt(searchParams.get('page') || '1', 10)
   const [deleteTarget, setDeleteTarget] = useState(null)
 
-  const { data, isLoading, isError } = useAgents(pageParams)
+  const { data, isLoading, isError } = useAgents({ page, limit: 9 })
   const { mutateAsync: deleteAgent, isPending: deleting } = useDeleteAgent()
 
   const agents     = data?.agents     ?? []
   const pagination = data?.pagination ?? null
+
+  const setPage = (p) => {
+    const nextParams = new URLSearchParams(searchParams)
+    if (p > 1) {
+      nextParams.set('page', p)
+    } else {
+      nextParams.delete('page')
+    }
+    setSearchParams(nextParams, { replace: true })
+  }
 
   const handleDelete = async () => {
     await deleteAgent(deleteTarget._id)
@@ -253,7 +275,7 @@ export default function AIAgentsPage() {
                 onDelete={setDeleteTarget} />
             ))}
           </div>
-          <Pagination pagination={pagination} onPage={(p) => setPageParams(pp => ({ ...pp, page: p }))} />
+          <Pagination pagination={pagination} onPage={setPage} />
         </>
       )}
 

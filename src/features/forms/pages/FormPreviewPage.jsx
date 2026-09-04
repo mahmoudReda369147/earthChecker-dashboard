@@ -227,44 +227,102 @@ function SectionField({ section, idx, answer, onChange, isActive, onClick }) {
           )}
 
           {/* Image upload */}
-          {section.type === 'image' && (
-            <div className="space-y-2">
-              <input ref={fileRef} type="file" accept="image/*" className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (!file) return
-                  const url = URL.createObjectURL(file)
-                  onChange(url)
-                }}
-              />
-              {answer ? (
-                <div className="relative group w-full">
-                  <img src={answer} alt="upload" className="w-full max-h-64 object-cover rounded-xl border border-[rgba(0,212,255,0.2)]" />
-                  <button type="button" onClick={() => onChange('')}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-[rgba(6,8,16,0.8)] border border-[rgba(200,121,65,0.4)] flex items-center justify-center text-copper hover:bg-[rgba(200,121,65,0.15)] transition-all">
-                    <X size={12} />
-                  </button>
-                </div>
-              ) : (
-                <button type="button" onClick={() => fileRef.current?.click()}
-                  className="w-full rounded-xl border-2 border-dashed border-[rgba(143,163,184,0.18)] p-8 text-center cursor-pointer hover:border-[rgba(0,212,255,0.35)] hover:bg-[rgba(0,212,255,0.02)] transition-all group">
-                  <div className="w-12 h-12 rounded-xl bg-[rgba(0,212,255,0.06)] border border-[rgba(0,212,255,0.15)] flex items-center justify-center mx-auto mb-3 group-hover:bg-[rgba(0,212,255,0.1)] transition-all">
-                    <Upload size={20} className="text-steel" />
+          {section.type === 'image' && (() => {
+            const isCustomSize = section.setting?.sizeMode === 'customSize'
+            const reqCount = isCustomSize ? (Number(section.setting?.size) || 1) : 1
+            const urls = Array.isArray(answer) ? answer.filter(Boolean) : (answer ? [answer] : [])
+            const isComplete = urls.length === reqCount
+
+            const handleFileChange = (e) => {
+              const files = Array.from(e.target.files || [])
+              if (!files.length) return
+              const newUrls = files.slice(0, reqCount - urls.length).map(f => URL.createObjectURL(f))
+              onChange([...urls, ...newUrls])
+              if (fileRef.current) fileRef.current.value = ''
+            }
+
+            const removeUrl = (index) => {
+              onChange(urls.filter((_, i) => i !== index))
+            }
+
+            return (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-[0.73rem] px-3 py-2 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(143,163,184,0.12)]">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded text-[0.65rem] font-semibold uppercase tracking-wider ${
+                      isCustomSize
+                        ? 'bg-[rgba(200,121,65,0.12)] text-copper border border-[rgba(200,121,65,0.25)]'
+                        : 'bg-[rgba(0,212,255,0.1)] text-cyan border border-[rgba(0,212,255,0.2)]'
+                    }`}>
+                      {isCustomSize ? 'Custom Size' : 'Sample Size Based'}
+                    </span>
+                    <span className="text-steel font-medium">
+                      {isCustomSize ? `Required: ${reqCount} image(s)` : 'Sample size dynamic per cycle'}
+                    </span>
                   </div>
-                  <p className="text-[0.82rem] font-medium text-steel">
-                    Click to upload image
+                  {isCustomSize && (
+                    <span className={`font-orbitron font-bold text-[0.7rem] ${
+                      isComplete ? 'text-emerald-400' : 'text-copper'
+                    }`}>
+                      {urls.length} / {reqCount}
+                    </span>
+                  )}
+                </div>
+
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple={reqCount > 1}
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+
+                {urls.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {urls.map((url, i) => (
+                      <div key={i} className="relative group rounded-xl overflow-hidden border border-[rgba(0,212,255,0.2)] aspect-video bg-[rgba(0,0,0,0.4)]">
+                        <img src={url} alt={`upload-${i+1}`} className="w-full h-full object-cover" />
+                        <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-[rgba(6,8,16,0.75)] text-[0.6rem] font-bold text-steel">
+                          #{i + 1}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeUrl(i)}
+                          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-[rgba(6,8,16,0.85)] border border-[rgba(200,121,65,0.4)] flex items-center justify-center text-copper hover:bg-[rgba(200,121,65,0.25)] transition-all"
+                        >
+                          <X size={11} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {!isComplete && (
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="w-full rounded-xl border-2 border-dashed border-[rgba(143,163,184,0.18)] p-6 text-center cursor-pointer hover:border-[rgba(0,212,255,0.35)] hover:bg-[rgba(0,212,255,0.02)] transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-[rgba(0,212,255,0.06)] border border-[rgba(0,212,255,0.15)] flex items-center justify-center mx-auto mb-2 group-hover:bg-[rgba(0,212,255,0.1)] transition-all">
+                      <Upload size={18} className="text-steel" />
+                    </div>
+                    <p className="text-[0.8rem] font-medium text-steel">
+                      Click to upload image ({urls.length}/{reqCount})
+                    </p>
+                    <p className="text-[0.65rem] text-text-muted mt-1">JPEG · PNG · WEBP</p>
+                  </button>
+                )}
+
+                {section.assignedBotId && (
+                  <p className="text-[0.68rem] text-copper flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-copper inline-block animate-pulse" />
+                    AI agent will analyze uploaded images
                   </p>
-                  <p className="text-[0.68rem] text-text-muted mt-1">JPEG · PNG · WEBP</p>
-                </button>
-              )}
-              {section.assignedBotId && (
-                <p className="text-[0.68rem] text-copper flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-copper inline-block animate-pulse" />
-                  AI agent will analyze this image
-                </p>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )
+          })()}
 
           {/* Rating */}
           {section.type === 'rating' && (

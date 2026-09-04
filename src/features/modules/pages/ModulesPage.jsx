@@ -262,17 +262,9 @@ export default function ModulesPage() {
 
       {/* ── Grid / empty ── */}
       {modules.length === 0 ? (
-        <div className="rounded-xl bg-bg-glass backdrop-blur-xl border border-[rgba(143,163,184,0.1)] flex flex-col items-center justify-center py-20 gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.12)] flex items-center justify-center">
-            <Layers size={26} className="text-[rgba(0,212,255,0.3)]" />
-          </div>
-          <div className="text-center space-y-1">
-            <p className="text-[0.88rem] font-semibold text-text-primary">No modules yet</p>
-            <p className="text-[0.76rem] text-text-muted">Create your first inspection module to get started.</p>
-          </div>
-          <button className="btn-primary text-[0.72rem] py-[9px] px-[20px] mt-1" onClick={() => setCreateOpen(true)}>
-            <Plus size={13} /> Create Module
-          </button>
+        <div className="flex flex-col items-center justify-center h-64 gap-3 text-text-muted">
+          <Layers size={40} className="text-[rgba(0,212,255,0.15)]" />
+          <p className="text-[0.85rem]">No modules yet. Create your first one!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

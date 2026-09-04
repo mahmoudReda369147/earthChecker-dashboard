@@ -33,17 +33,21 @@ import SettingsPage     from './features/settings/pages/SettingsPage'
 /* ── Layout & auth guard ── */
 import DashboardLayout from './components/layout/DashboardLayout'
 import ProtectedRoute  from './components/auth/ProtectedRoute'
+import PublicRoute     from './components/auth/PublicRoute'
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public auth routes */}
-        <Route path="/login"                   element={<LoginPage />} />
-        <Route path="/signup"                  element={<SignupPage />} />
-        <Route path="/verify-email/:token"     element={<VerifyEmailPage />} />
-        <Route path="/forgot-password"         element={<ForgotPasswordPage />} />
-        <Route path="/reset-password/:token"   element={<ResetPasswordPage />} />
+        {/* Public auth routes (redirects to dashboard if already logged in) */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login"                 element={<LoginPage />} />
+          <Route path="/signup"                element={<SignupPage />} />
+          <Route path="/forgot-password"       element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+        </Route>
+
+        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
 
         {/* Standalone — no dashboard chrome */}
         <Route path="/form-preview"          element={<FormPreviewPage />} />

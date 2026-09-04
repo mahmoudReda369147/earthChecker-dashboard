@@ -16,7 +16,7 @@ export function useCycleSubmissions(cycleId) {
     queryKey: [KEY, cycleId],
     queryFn:  () => getCycleSubmissionsService(cycleId),
     enabled:  !!cycleId,
-    select:   (d) => d?.data?.submissions ?? [],
+    select:   (d) => d?.data ?? { submissions: [], analyses: [] },
   })
 }
 

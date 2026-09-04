@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Loader2, AlertTriangle, Plus, Pencil, Trash2,
   UserCheck, UserX, Search, Users,
@@ -7,6 +7,7 @@ import {
 import PageHeader from '../../../components/ui/PageHeader'
 import Modal      from '../../../components/ui/Modal'
 import DataTable  from '../../../components/ui/DataTable'
+import StaffFilters from '../components/StaffFilters'
 import { useMe }  from '../../auth/apiHooks'
 import { useStaff, useUpdateStaff, useDeleteStaff } from '../apiHooks'
 
@@ -52,17 +53,78 @@ function Avatar({ name, image }) {
 
 export default function StaffPage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const { data: me } = useMe()
   const myRank       = ROLE_RANK[me?.role] ?? 0
   const canManage    = me?.role === 'ceo' || me?.role === 'supervisor'
 
-  const [page,       setPage]       = useState(1)
-  const [search,     setSearch]     = useState('')
-  const [roleFilter, setRoleFilter] = useState('')
+  /* Filter States synced with URL Query Params */
+  const search          = searchParams.get('search') || ''
+  const roleFilter      = searchParams.get('role') || ''
+  const statusFilter    = searchParams.get('status') || ''
+  const createdByFilter = searchParams.get('createdBy') || ''
+  const fromDate        = searchParams.get('fromDate') || ''
+  const toDate          = searchParams.get('toDate') || ''
+  const page            = parseInt(searchParams.get('page') || '1', 10)
+
+  const updateParam = (key, value, resetPage = true) => {
+    const nextParams = new URLSearchParams(searchParams)
+    if (value) {
+      nextParams.set(key, value)
+    } else {
+      nextParams.delete(key)
+    }
+    if (resetPage && key !== 'page') {
+      nextParams.delete('page')
+    }
+    setSearchParams(nextParams, { replace: true })
+  }
+
+  const handleDateRangeChange = (newFrom, newTo) => {
+    const nextParams = new URLSearchParams(searchParams)
+    if (newFrom) {
+      nextParams.set("fromDate", newFrom)
+    } else {
+      nextParams.delete("fromDate")
+    }
+    if (newTo) {
+      nextParams.set("toDate", newTo)
+    } else {
+      nextParams.delete("toDate")
+    }
+    nextParams.delete("page")
+    setSearchParams(nextParams, { replace: true })
+  }
+
+  /* Fetch all staff for creator dropdown options */
+  const { data: allStaffData } = useStaff({ limit: 200, includeSelf: true })
+  const allStaffList = allStaffData?.staff ?? []
+  
+  const creatorMap = new Map()
+  allStaffList.forEach((s) => {
+    if (s.createdBy) {
+      const cId   = s.createdBy._id ? s.createdBy._id.toString() : s.createdBy.toString()
+      const cName = s.createdBy.name ?? 'Creator'
+      if (!creatorMap.has(cId)) {
+        creatorMap.set(cId, { value: cId, label: cName })
+      }
+    }
+  })
+  const addedByOptions = [
+    { value: '', label: 'All Creators' },
+    ...Array.from(creatorMap.values()),
+  ]
 
   const { data, isLoading, isError } = useStaff({
-    page, limit: PER_PAGE, search, role: roleFilter,
+    page,
+    limit: PER_PAGE,
+    search,
+    role: roleFilter,
+    status: statusFilter,
+    createdBy: createdByFilter,
+    fromDate,
+    toDate,
   })
 
   const { mutateAsync: updateStaff, isPending: updating } = useUpdateStaff()
@@ -172,32 +234,27 @@ export default function StaffPage() {
         }
       />
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[200px] max-w-[320px]">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search name or email…"
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-            className="w-full pl-8 pr-3 py-[9px] rounded-lg bg-bg-glass backdrop-blur-lg border border-[rgba(143,163,184,0.12)] text-[0.8rem] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-[rgba(0,212,255,0.35)] transition-colors"
-          />
-        </div>
-
-        {/* Role filter */}
-        <select
-          value={roleFilter}
-          onChange={(e) => { setRoleFilter(e.target.value); setPage(1) }}
-          className="px-3 py-[9px] rounded-lg bg-bg-glass backdrop-blur-lg border border-[rgba(143,163,184,0.12)] text-[0.8rem] text-text-primary focus:outline-none focus:border-[rgba(0,212,255,0.35)] transition-colors cursor-pointer"
-        >
-          <option value="">All Roles</option>
-          <option value="ceo">CEO</option>
-          <option value="supervisor">Supervisor</option>
-          <option value="worker">Worker</option>
-        </select>
-      </div>
+      {/* High-End Staff Filters Section */}
+      <StaffFilters
+        search={search}
+        onSearchChange={(val) => updateParam('search', val)}
+        role={roleFilter}
+        onRoleChange={(val) => updateParam('role', val)}
+        status={statusFilter}
+        onStatusChange={(val) => updateParam('status', val)}
+        createdBy={createdByFilter}
+        onCreatedByChange={(val) => updateParam('createdBy', val)}
+        fromDate={fromDate}
+        toDate={toDate}
+        onDateRangeChange={handleDateRangeChange}
+        addedByOptions={addedByOptions}
+        hasActiveFilters={Boolean(
+          search || roleFilter || statusFilter || createdByFilter || fromDate || toDate
+        )}
+        onClearAll={() => setSearchParams({}, { replace: true })}
+        totalRecords={total}
+        showingRecords={staff.length}
+      />
 
       {/* Table */}
       {isLoading ? (
@@ -217,23 +274,8 @@ export default function StaffPage() {
           total={total}
           page={page}
           perPage={PER_PAGE}
-          onPageChange={setPage}
-          emptyMessage={
-            <div className="flex flex-col items-center gap-4 py-8">
-              <div className="w-14 h-14 rounded-2xl bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.1)] flex items-center justify-center">
-                <Users size={22} className="text-[rgba(0,212,255,0.3)]" />
-              </div>
-              <p className="text-[0.82rem] text-steel">No staff members found.</p>
-              {canManage && (
-                <button
-                  className="btn-primary text-[0.72rem] py-[8px] px-[16px]"
-                  onClick={() => navigate('/dashboard/staff/create')}
-                >
-                  <Plus size={13} /> Add First Staff Member
-                </button>
-              )}
-            </div>
-          }
+          onPageChange={(p) => updateParam('page', p > 1 ? p.toString() : '', false)}
+          emptyMessage="No staff members found."
           entityLabel="staff"
         />
       )}
