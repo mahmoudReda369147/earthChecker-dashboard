@@ -1,7 +1,16 @@
 import axios from 'axios'
 
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL
+  if (envUrl) {
+    const cleaned = envUrl.replace(/\/$/, '')
+    return cleaned.endsWith('/api') ? cleaned : `${cleaned}/api`
+  }
+  return '/api'
+}
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: getBaseURL(),
   withCredentials: true, // send httpOnly refresh-token cookie automatically
 })
 
@@ -50,7 +59,7 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const { data } = await axios.post('/api/auth/refresh-token', {}, { withCredentials: true })
+        const { data } = await axios.post(`${getBaseURL()}/auth/refresh-token`, {}, { withCredentials: true })
         const newToken = data.data.accessToken
         localStorage.setItem('accessToken', newToken)
         api.defaults.headers.common.Authorization = `Bearer ${newToken}`
